@@ -1,5 +1,6 @@
 defmodule PheedsWeb.FeedLive.FormComponent do
   use PheedsWeb, :live_component
+  require Logger
 
   alias Pheeds.SourceFeeds
 
@@ -21,8 +22,7 @@ defmodule PheedsWeb.FeedLive.FormComponent do
       >
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:url]} type="text" label="Url" />
-        <.input field={@form[:last_update]} type="datetime-local" label="Last update" />
-        <.input field={@form[:status]} type="number" label="Status" />
+        <.input field={@form[:xpath_expression]} type="text" label="XPath" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Feed</.button>
         </:actions>
@@ -34,7 +34,7 @@ defmodule PheedsWeb.FeedLive.FormComponent do
   @impl true
   def update(%{feed: feed} = assigns, socket) do
     changeset = SourceFeeds.change_feed(feed)
-
+    Logger.critical("Running update - #{inspect(assigns)}")
     {:ok,
      socket
      |> assign(assigns)
@@ -43,6 +43,7 @@ defmodule PheedsWeb.FeedLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"feed" => feed_params}, socket) do
+    Logger.critical("Running Validate - #{inspect(feed_params)}")
     changeset =
       socket.assigns.feed
       |> SourceFeeds.change_feed(feed_params)

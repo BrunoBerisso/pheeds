@@ -7,6 +7,7 @@ defmodule Pheeds.SourceFeeds.Feed do
     field :title, :string
     field :url, :string
     field :last_update, :naive_datetime
+    field :xpath_expression, :string
 
     timestamps(type: :utc_datetime)
   end
@@ -14,7 +15,7 @@ defmodule Pheeds.SourceFeeds.Feed do
   @doc false
   def changeset(feed, attrs) do
     feed
-    |> cast(attrs, [:title, :url, :last_update, :status])
-    |> validate_required([:title, :url, :last_update, :status])
+    |> cast(attrs, [:title, :url, :last_update, :status, :xpath_expression])
+    |> validate_required([:title, :url])
   end
 end
