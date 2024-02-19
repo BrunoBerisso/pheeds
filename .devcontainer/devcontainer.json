@@ -1,0 +1,16 @@
+// For format details, see https://aka.ms/devcontainer.json. For config options, see the
+// README at: https://github.com/devcontainers/templates/tree/main/src/dotnet
+{
+	"name": "Elixir + Phoenix",
+	"dockerComposeFile": ["workspace-compose.yml", "../docker-compose.yml"],
+	"service": "workspace",
+	"workspaceFolder": "/workspace/pheeds",
+	"customizations": {
+		"vscode": {
+			"extensions": [
+				"JakeBecker.elixir-ls"
+			]
+		}
+	}
+}
+

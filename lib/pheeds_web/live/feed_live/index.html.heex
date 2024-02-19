@@ -1,0 +1,44 @@
+<.header>
+  Listing Feeds
+  <:actions>
+    <.link patch={~p"/feeds/new"}>
+      <.button>New Feed</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.table
+  id="feeds"
+  rows={@streams.feeds}
+  row_click={fn {_id, feed} -> JS.navigate(~p"/feeds/#{feed}") end}
+>
+  <:col :let={{_id, feed}} label="Title"><%= feed.title %></:col>
+  <:col :let={{_id, feed}} label="Url"><%= feed.url %></:col>
+  <:col :let={{_id, feed}} label="Last update"><%= feed.last_update %></:col>
+  <:col :let={{_id, feed}} label="Status"><%= feed.status %></:col>
+  <:action :let={{_id, feed}}>
+    <div class="sr-only">
+      <.link navigate={~p"/feeds/#{feed}"}>Show</.link>
+    </div>
+    <.link patch={~p"/feeds/#{feed}/edit"}>Edit</.link>
+  </:action>
+  <:action :let={{id, feed}}>
+    <.link
+      phx-click={JS.push("delete", value: %{id: feed.id}) |> hide("##{id}")}
+      data-confirm="Are you sure?"
+    >
+      Delete
+    </.link>
+  </:action>
+</.table>
+
+<.modal :if={@live_action in [:new, :edit]} id="feed-modal" show on_cancel={JS.patch(~p"/feeds")}>
+  <.live_component
+    module={PheedsWeb.FeedLive.FormComponent}
+    id={@feed.id || :new}
+    title={@page_title}
+    action={@live_action}
+    feed={@feed}
+    patch={~p"/feeds"}
+  />
+</.modal>

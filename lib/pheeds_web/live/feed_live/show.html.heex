@@ -1,0 +1,29 @@
+<.header>
+  Feed <%= @feed.id %>
+  <:subtitle>This is a feed record from your database.</:subtitle>
+  <:actions>
+    <.link patch={~p"/feeds/#{@feed}/show/edit"} phx-click={JS.push_focus()}>
+      <.button>Edit feed</.button>
+    </.link>
+  </:actions>
+</.header>
+
+<.list>
+  <:item title="Title"><%= @feed.title %></:item>
+  <:item title="Url"><%= @feed.url %></:item>
+  <:item title="Last update"><%= @feed.last_update %></:item>
+  <:item title="Status"><%= @feed.status %></:item>
+</.list>
+
+<.back navigate={~p"/feeds"}>Back to feeds</.back>
+
+<.modal :if={@live_action == :edit} id="feed-modal" show on_cancel={JS.patch(~p"/feeds/#{@feed}")}>
+  <.live_component
+    module={PheedsWeb.FeedLive.FormComponent}
+    id={@feed.id}
+    title={@page_title}
+    action={@live_action}
+    feed={@feed}
+    patch={~p"/feeds/#{@feed}"}
+  />
+</.modal>
