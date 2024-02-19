@@ -1,6 +1,6 @@
 <.header>
-  Feed <%= @feed.id %>
-  <:subtitle>This is a feed record from your database.</:subtitle>
+  <%= @feed.title %> Feed
+  <:subtitle><%= if !@feed.xpath_expression, do: "RSS feed", else: "XPath extracted feed" %></:subtitle>
   <:actions>
     <.link patch={~p"/feeds/#{@feed}/show/edit"} phx-click={JS.push_focus()}>
       <.button>Edit feed</.button>

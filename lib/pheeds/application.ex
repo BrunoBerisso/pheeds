@@ -14,8 +14,7 @@ defmodule Pheeds.Application do
       {Phoenix.PubSub, name: Pheeds.PubSub},
       # Start the Finch HTTP client for sending emails
       {Finch, name: Pheeds.Finch},
-      # Start a worker by calling: Pheeds.Worker.start_link(arg)
-      # {Pheeds.Worker, arg},
+      Pheeds.FeedsFetcher,
       # Start to serve requests, typically the last entry
       PheedsWeb.Endpoint
     ]
