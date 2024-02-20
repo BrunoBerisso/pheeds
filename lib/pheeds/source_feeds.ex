@@ -3,9 +3,11 @@ defmodule Pheeds.SourceFeeds do
   The SourceFeeds context.
   """
 
-  import Ecto.Query, warn: false
-  alias Pheeds.Repo
+  @seconds_in_a_day 86400
 
+  import Ecto.Query, warn: false
+  import NaiveDateTime
+  alias Pheeds.Repo
   alias Pheeds.SourceFeeds.Feed
 
   @doc """
@@ -101,4 +103,28 @@ defmodule Pheeds.SourceFeeds do
   def change_feed(%Feed{} = feed, attrs \\ %{}) do
     Feed.changeset(feed, attrs)
   end
+
+  def stale_feeds() do
+    query = from f in Feed, where: (f.status == ^Feed.status(:ok) and ^add(local_now(), -@seconds_in_a_day) <= f.last_update) or is_nil(f.last_update)
+    Repo.all(query)
+  end
+
+  def start_updating!(feed) do
+     feed
+      |> Feed.changeset(%{status: Feed.status(:updating)})
+      |> Repo.update!()
+  end
+
+  def end_updating!(feed) do
+     feed
+      |> Feed.changeset(%{status: Feed.status(:ok), last_update: NaiveDateTime.local_now()})
+      |> Repo.update!()
+  end
+
+  def eror_updating!(feed) do
+    feed
+     |> Feed.changeset(%{status: Feed.status(:error)})
+     |> Repo.update!()
+  end
+
 end
