@@ -7,6 +7,7 @@ defmodule Pheeds.SourceFeeds do
 
   import Ecto.Query, warn: false
   import NaiveDateTime
+  alias Pheeds.SourceFeeds.Article
   alias Pheeds.Repo
   alias Pheeds.SourceFeeds.Feed
 
@@ -105,7 +106,7 @@ defmodule Pheeds.SourceFeeds do
   end
 
   def stale_feeds() do
-    query = from f in Feed, where: (f.status == ^Feed.status(:ok) and ^add(local_now(), -@seconds_in_a_day) <= f.last_update) or is_nil(f.last_update)
+    query = from f in Feed, where: (f.status == ^Feed.status(:ok) and ^add(utc_now(), -@seconds_in_a_day) <= f.last_update) or is_nil(f.last_update)
     Repo.all(query)
   end
 
@@ -117,14 +118,21 @@ defmodule Pheeds.SourceFeeds do
 
   def end_updating!(feed) do
      feed
-      |> Feed.changeset(%{status: Feed.status(:ok), last_update: NaiveDateTime.local_now()})
+      |> Feed.changeset(%{status: Feed.status(:ok), last_update: utc_now()})
       |> Repo.update!()
   end
 
-  def eror_updating!(feed) do
+  def error_updating!(feed) do
     feed
      |> Feed.changeset(%{status: Feed.status(:error)})
      |> Repo.update!()
+  end
+
+  def insert_articles!(articles) do
+    # :on_conflict :nothing will avoid an exception on duplicated articles, but insert_all might raise
+    # error for other reasons. That's why I keept the "!" in the name of this function
+    {inserted, _} = Repo.insert_all(Article, articles, [{:on_conflict, :nothing}])
+    inserted
   end
 
 end
