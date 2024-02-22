@@ -7,6 +7,7 @@ defmodule Pheeds.SourceFeeds do
 
   import Ecto.Query, warn: false
   import NaiveDateTime
+  alias Phoenix.PubSub
   alias Pheeds.SourceFeeds.Article
   alias Pheeds.Repo
   alias Pheeds.SourceFeeds.Feed
@@ -119,18 +120,32 @@ defmodule Pheeds.SourceFeeds do
     feed
     |> Feed.changeset(%{status: Feed.status(:updating)})
     |> Repo.update!()
+
+    PubSub.broadcast!(Pheeds.PubSub, "feed_fetcher", {:start, [{:id, feed.id}]})
   end
 
-  def end_updating!(feed) do
+  def end_updating!(feed, added_articles) do
     feed
     |> Feed.changeset(%{status: Feed.status(:ok), last_update: utc_now()})
     |> Repo.update!()
+
+    PubSub.broadcast!(
+      Pheeds.PubSub,
+      "feed_fetcher",
+      {:done, [{:id, feed.id}, {:title, feed.title}, {:added, added_articles}]}
+    )
   end
 
-  def error_updating!(feed) do
+  def error_updating!(feed, error_desc) do
     feed
     |> Feed.changeset(%{status: Feed.status(:error)})
     |> Repo.update!()
+
+    PubSub.broadcast!(
+      Pheeds.PubSub,
+      "feed_fetcher",
+      {:error, [{:id, feed.id}, {:title, feed.title}, {:error, error_desc}]}
+    )
   end
 
   def insert_articles!(articles) do

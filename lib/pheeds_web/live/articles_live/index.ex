@@ -1,11 +1,14 @@
 defmodule PheedsWeb.ArticlesLive.Index do
+  alias Phoenix.PubSub
   use PheedsWeb, :live_view
+  require Logger
 
   alias Pheeds.SourceFeeds
 
   @pagination_limit 50
-  @stream_limit 150
+  @stream_limit 100
 
+  @impl true
   def render(assigns) do
     ~H"""
     <.header class="pb-10">
@@ -55,7 +58,10 @@ defmodule PheedsWeb.ArticlesLive.Index do
     """
   end
 
+  @impl true
   def mount(_params, _session, socket) do
+    # This view will be automatically unsubscribed when the view process terminates
+    PubSub.subscribe(Pheeds.PubSub, "feed_fetcher")
     {:ok, paginate_article(socket, :reset)}
   end
 
@@ -94,6 +100,7 @@ defmodule PheedsWeb.ArticlesLive.Index do
     end
   end
 
+  @impl true
   def handle_event("next-page", _, socket) do
     {:noreply, paginate_article(socket, :next)}
   end
@@ -101,5 +108,29 @@ defmodule PheedsWeb.ArticlesLive.Index do
   def handle_event("previous-page", params, socket) do
     direction = if params["_overran"], do: :reset, else: :previous
     {:noreply, paginate_article(socket, direction)}
+  end
+
+  @impl true
+  def handle_info(:clear_flash, socket) do
+    {:noreply, clear_flash(socket)}
+  end
+
+  def handle_info(msg, socket) do
+    socket =
+      case msg do
+        {:done, [_, {:title, feed_title}, {:added, cnt}]} when cnt > 0 ->
+          Process.send_after(self(), :clear_flash, 3000)
+          put_flash(socket, :info, "Added #{cnt} articles from #{feed_title}")
+
+        {:error, [_, {:title, feed_title}, {:error, msg}]} ->
+          Process.send_after(self(), :clear_flash, 3000)
+          put_flash(socket, :error, "Fetching failed for feed #{feed_title}: #{msg}")
+
+        _ ->
+          socket
+      end
+
+    Logger.debug("articles_live received #{inspect(msg)} - #{inspect(socket)}")
+    {:noreply, socket}
   end
 end

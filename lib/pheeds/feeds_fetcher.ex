@@ -55,11 +55,12 @@ defmodule Pheeds.FeedsFetcher do
 
     Logger.debug("Inserted #{inserted} new articles for feed #{feed.id}")
 
-    SourceFeeds.end_updating!(feed)
+    SourceFeeds.end_updating!(feed, inserted)
   rescue
-    e ->
-      Logger.error("Error processing feed #{feed.id}: #{inspect(e)}")
-      SourceFeeds.error_updating!(feed)
+    error ->
+      error_desc = inspect(error)
+      Logger.error("Error processing feed #{feed.id}: #{error_desc}")
+      SourceFeeds.error_updating!(feed, error_desc)
   end
 
   defp build_article(xml_map) do
