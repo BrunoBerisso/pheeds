@@ -1,4 +1,5 @@
 defmodule PheedsWeb.FeedLive.Index do
+  alias Phoenix.PubSub
   use PheedsWeb, :live_view
 
   alias Pheeds.SourceFeeds
@@ -6,6 +7,7 @@ defmodule PheedsWeb.FeedLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
+    PubSub.subscribe(Pheeds.PubSub, "feed_fetcher")
     {:ok, stream(socket, :feeds, SourceFeeds.list_feeds())}
   end
 
@@ -33,15 +35,19 @@ defmodule PheedsWeb.FeedLive.Index do
   end
 
   @impl true
-  def handle_info({PheedsWeb.FeedLive.FormComponent, {:saved, feed}}, socket) do
-    {:noreply, stream_insert(socket, :feeds, feed)}
-  end
-
-  @impl true
   def handle_event("delete", %{"id" => id}, socket) do
     feed = SourceFeeds.get_feed!(id)
     {:ok, _} = SourceFeeds.delete_feed(feed)
 
     {:noreply, stream_delete(socket, :feeds, feed)}
+  end
+
+  @impl true
+  def handle_info({PheedsWeb.FeedLive.FormComponent, {:saved, feed}}, socket) do
+    {:noreply, stream_insert(socket, :feeds, feed)}
+  end
+
+  def handle_info({:feed_fetcher, {_, [{:feed, feed} | _]}}, socket) do
+    {:noreply, socket |> stream_insert(:feeds, feed)}
   end
 end

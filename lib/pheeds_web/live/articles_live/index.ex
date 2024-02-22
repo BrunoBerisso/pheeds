@@ -115,16 +115,16 @@ defmodule PheedsWeb.ArticlesLive.Index do
     {:noreply, clear_flash(socket)}
   end
 
-  def handle_info(msg, socket) do
+  def handle_info({:feed_fetcher, msg}, socket) do
     socket =
       case msg do
-        {:done, [_, {:title, feed_title}, {:added, cnt}]} when cnt > 0 ->
+        {:done, [{:feed, feed}, {:added, cnt}]} when cnt > 0 ->
           Process.send_after(self(), :clear_flash, 3000)
-          put_flash(socket, :info, "Added #{cnt} articles from #{feed_title}")
+          put_flash(socket, :info, "Added #{cnt} articles from #{feed.title}")
 
-        {:error, [_, {:title, feed_title}, {:error, msg}]} ->
+        {:error, [{:feed, feed}, {:error, msg}]} ->
           Process.send_after(self(), :clear_flash, 3000)
-          put_flash(socket, :error, "Fetching failed for feed #{feed_title}: #{msg}")
+          put_flash(socket, :error, "Fetching failed for feed #{feed.title}: #{msg}")
 
         _ ->
           socket

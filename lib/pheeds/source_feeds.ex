@@ -121,7 +121,7 @@ defmodule Pheeds.SourceFeeds do
     |> Feed.changeset(%{status: Feed.status(:updating)})
     |> Repo.update!()
 
-    PubSub.broadcast!(Pheeds.PubSub, "feed_fetcher", {:start, [{:id, feed.id}]})
+    PubSub.broadcast!(Pheeds.PubSub, "feed_fetcher", {:feed_fetcher, {:start, [{:feed, feed}]}})
   end
 
   def end_updating!(feed, added_articles) do
@@ -132,7 +132,7 @@ defmodule Pheeds.SourceFeeds do
     PubSub.broadcast!(
       Pheeds.PubSub,
       "feed_fetcher",
-      {:done, [{:id, feed.id}, {:title, feed.title}, {:added, added_articles}]}
+      {:feed_fetcher, {:done, [{:feed, feed}, {:added, added_articles}]}}
     )
   end
 
@@ -144,7 +144,7 @@ defmodule Pheeds.SourceFeeds do
     PubSub.broadcast!(
       Pheeds.PubSub,
       "feed_fetcher",
-      {:error, [{:id, feed.id}, {:title, feed.title}, {:error, error_desc}]}
+      {:feed_fetcher, {:error, [{:feed, feed}, {:error, error_desc}]}}
     )
   end
 
