@@ -17,7 +17,7 @@ defmodule PheedsWeb.Router do
   scope "/", PheedsWeb do
     pipe_through :browser
 
-    get "/", PageController, :home
+    live "/", ArticlesLive.Index, :index
     live "/feeds", FeedLive.Index, :index
     live "/feeds/new", FeedLive.Index, :new
     live "/feeds/:id/edit", FeedLive.Index, :edit

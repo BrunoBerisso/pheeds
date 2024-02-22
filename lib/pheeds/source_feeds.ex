@@ -106,26 +106,31 @@ defmodule Pheeds.SourceFeeds do
   end
 
   def stale_feeds() do
-    query = from f in Feed, where: (f.status == ^Feed.status(:ok) and ^add(utc_now(), -@seconds_in_a_day) <= f.last_update) or is_nil(f.last_update)
+    query =
+      from f in Feed,
+        where:
+          (f.status == ^Feed.status(:ok) and ^add(utc_now(), -@seconds_in_a_day) <= f.last_update) or
+            is_nil(f.last_update)
+
     Repo.all(query)
   end
 
   def start_updating!(feed) do
-     feed
-      |> Feed.changeset(%{status: Feed.status(:updating)})
-      |> Repo.update!()
+    feed
+    |> Feed.changeset(%{status: Feed.status(:updating)})
+    |> Repo.update!()
   end
 
   def end_updating!(feed) do
-     feed
-      |> Feed.changeset(%{status: Feed.status(:ok), last_update: utc_now()})
-      |> Repo.update!()
+    feed
+    |> Feed.changeset(%{status: Feed.status(:ok), last_update: utc_now()})
+    |> Repo.update!()
   end
 
   def error_updating!(feed) do
     feed
-     |> Feed.changeset(%{status: Feed.status(:error)})
-     |> Repo.update!()
+    |> Feed.changeset(%{status: Feed.status(:error)})
+    |> Repo.update!()
   end
 
   def insert_articles!(articles) do
@@ -135,4 +140,13 @@ defmodule Pheeds.SourceFeeds do
     inserted
   end
 
+  def list_articles_paginated(page, limit \\ 10) when page >= 0 do
+    query =
+      from f in Article,
+        limit: ^limit,
+        offset: ^((page - 1) * limit),
+        order_by: [desc: :published_date]
+
+    Repo.all(query)
+  end
 end

@@ -8,7 +8,9 @@
 	"customizations": {
 		"vscode": {
 			"extensions": [
-				"JakeBecker.elixir-ls"
+				"JakeBecker.elixir-ls",
+				"phoenixframework.phoenix",
+				"bradlc.vscode-tailwindcss"
 			]
 		}
 	}
