@@ -3,9 +3,10 @@ version: "3.8"
 services:
   workspace:
     build:
+      context: .
       dockerfile: Dockerfile
     volumes:
       - ..:/workspace/pheeds
-      - /Users/bruno/.ssh/:/root/.ssh/:ro
+      - ~/.ssh/:/root/.ssh/:ro
     command: sleep infinity
 

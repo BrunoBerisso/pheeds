@@ -34,7 +34,7 @@ defmodule PheedsWeb.FeedLive.FormComponent do
   @impl true
   def update(%{feed: feed} = assigns, socket) do
     changeset = SourceFeeds.change_feed(feed)
-    Logger.critical("Running update - #{inspect(assigns)}")
+
     {:ok,
      socket
      |> assign(assigns)
@@ -43,7 +43,6 @@ defmodule PheedsWeb.FeedLive.FormComponent do
 
   @impl true
   def handle_event("validate", %{"feed" => feed_params}, socket) do
-    Logger.critical("Running Validate - #{inspect(feed_params)}")
     changeset =
       socket.assigns.feed
       |> SourceFeeds.change_feed(feed_params)

@@ -21,7 +21,7 @@ defmodule Pheeds.FeedsFetcher do
 
   @impl true
   def handle_info(:fetch_feeds, state) do
-    Logger.critical("Timer fire #{inspect(state)}")
+    Logger.debug("Timer fire #{inspect(state)}")
     SourceFeeds.list_feeds() |> Enum.each(&process_feed/1)
     schedule_timer()
     {:noreply, state}
