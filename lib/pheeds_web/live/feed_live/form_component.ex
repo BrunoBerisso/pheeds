@@ -22,7 +22,10 @@ defmodule PheedsWeb.FeedLive.FormComponent do
       >
         <.input field={@form[:title]} type="text" label="Title" />
         <.input field={@form[:url]} type="text" label="Url" />
-        <.input field={@form[:xpath_expression]} type="text" label="XPath" />
+        <.input field={@form[:items_xpath]} type="text" label="Items XPath" />
+        <.input field={@form[:title_xpath]} type="text" label="Title XPath" />
+        <.input field={@form[:link_xpath]} type="text" label="Link XPath" />
+        <.input field={@form[:date_xpath]} type="text" label="Date XPath" />
         <:actions>
           <.button phx-disable-with="Saving...">Save Feed</.button>
         </:actions>
