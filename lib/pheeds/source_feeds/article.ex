@@ -6,6 +6,7 @@ defmodule Pheeds.SourceFeeds.Article do
     field :link, :string
     field :title, :string
     field :published_date, :naive_datetime
+    belongs_to :feed, Feed
 
     timestamps(type: :utc_datetime)
   end
@@ -18,7 +19,11 @@ defmodule Pheeds.SourceFeeds.Article do
   end
 
   def parse_published_date!(string_date) do
-    string_date |> String.split(" ") |> Enum.with_index |> Enum.reduce(&(build_iso8601/2)) |> NaiveDateTime.from_iso8601!
+    string_date
+    |> String.split(" ")
+    |> Enum.with_index()
+    |> Enum.reduce(&build_iso8601/2)
+    |> NaiveDateTime.from_iso8601!()
   end
 
   # Sun, 11 Feb 2024 00:44:37 +0000
@@ -28,7 +33,7 @@ defmodule Pheeds.SourceFeeds.Article do
       {v, 2} -> month_name_to_pos(v) <> "-" <> str_acc
       {v, 3} -> v <> "-" <> str_acc
       {v, 4} -> str_acc <> "T" <> v
-      {v, 5} -> str_acc <> (if String.starts_with?(v, "+"), do: v, else: "+0000")
+      {v, 5} -> str_acc <> if String.starts_with?(v, "+"), do: v, else: "+0000"
       _ -> str_acc
     end
   end
