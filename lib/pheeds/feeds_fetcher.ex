@@ -46,7 +46,7 @@ defmodule Pheeds.FeedsFetcher do
     inserted =
       feed_content.body
       |> build_xpath(feed)
-      |> Stream.map(&build_article(&1, base_url))
+      |> Stream.map(&build_article(&1, base_url, feed))
       |> Stream.filter(&(&1 != nil))
       |> Stream.chunk_every(200)
       |> Enum.reduce(0, &(SourceFeeds.insert_articles!(&1) + &2))
@@ -72,17 +72,18 @@ defmodule Pheeds.FeedsFetcher do
     link_expr = feed.link_xpath || if is_rss, do: "./link/text()", else: "./link/@href"
     date_expr = feed.date_xpath || if is_rss, do: "./pubDate/text()", else: "./updated/text()"
 
-    xpath(feed_body, sigil_x(items_expr, "l"),
-      title: sigil_x(title_expr, "s"),
-      link: sigil_x(link_expr, "s"),
-      published_date: sigil_x(date_expr, "s")
+    xpath(feed_body, sigil_x(items_expr, ~c"l"),
+      title: sigil_x(title_expr, ~c"s"),
+      link: sigil_x(link_expr, ~c"s"),
+      published_date: sigil_x(date_expr, ~c"s")
     )
   end
 
-  defp build_article(xml_map, base_url) do
+  defp build_article(xml_map, base_url, feed) do
     link_uri = URI.parse(xml_map[:link])
 
     new_props = %{
+      feed_id: feed.id,
       published_date: Article.parse_published_date!(xml_map[:published_date]),
       link:
         if(link_uri.scheme,
